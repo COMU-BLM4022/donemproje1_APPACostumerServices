@@ -14,3 +14,12 @@ Bu rapor Bilgi Yönetim Sistemi dersinin Bitirme Projesi için oluşturulmuştur
 ### Q1: İş probleminin tanımı
 
 **Appa Customer Services** şirketi, danışanlarından aldığı verilerdeki değerlere göre lokasyon analizi sağlamaktadır. Danışan, müşterilerinin kişisel bilgilerinin (Adı, adresi vb.) anonimliğini gözeterek **Appa**'ya iletir. **Appa CS**, kendisine sağlanan veri üzerinden danışanın yeni şubesini/deposunu nereye açabileceğini analiz eder. Veri içe aktarma kolaylığından ötürü **Suite CRM** kullanılmaktadır. 
+
+### Q2: İş problemini çözmede kullanılacak data seti
+
+Platforma eklenen veri seti dünya çapındaki e-ticaret verilerini barındıran temizlenmiş bir veri setidir. Veri seti Kaggle üzerinden bulunmuştur. Veri üzerinde yalnızca filtreleme ve format çalışması yapılmıştır. Sentetik veri üretilmemiştir. Ayrıca analizi iyileştirmek için şehirlerdeki hayat pahalılığı ile korelasyonu da incelenmiştir.
+
+[Satın Alma Verileri](https://www.kaggle.com/datasets/apoorvaappz/global-super-store-dataset)<br/>
+[Hayat Pahalılığı Verileri](https://www.kaggle.com/datasets/mvieira101/global-cost-of-living?select=cost-of-living.csv)
+
+
