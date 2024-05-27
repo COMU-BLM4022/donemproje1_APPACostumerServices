@@ -1,0 +1,13 @@
+```{r}
+
+library("AppaCustomerServices")
+AppaCustomerServices::kutuphaneler()
+data <- AppaCustomerServices::get_data()
+data <- AppaCustomerServices::char_to_date(data)
+data <- AppaCustomerServices::usd_to_tl(data)
+total_profit <- AppaCustomerServices::total_profit_by_state_5(data)
+AppaCustomerServices::make_graphic(total_profit)
+print(total_profit_by_city_asc(data))
+print(AppaCustomerServices::calculate_percentage_of_total(data))
+
+```

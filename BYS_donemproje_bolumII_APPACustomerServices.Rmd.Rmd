@@ -1,0 +1,122 @@
+---
+title: "Bilgi Yönetim Sistemleri - Bitirme Projesi Rapor:
+Begüm Önal 200401082<br/>
+Barkın Oral 180401089<br/>
+Kubilay Kabataş 200401089<br/>
+Ramazan Eyüp Gültekin 200401003<br/>
+Tugay Bakay 200401029"
+output:
+  html_document:
+    df_print: paged
+---
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+install_and_load <- function(package) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+# List of packages to check and load
+packages <- c("readxl", "ggplot2", "leaflet", "leaflet.extras", "dplyr", "geosphere", "magrittr")
+
+# Apply the function to each package
+sapply(packages, install_and_load)
+
+install.packages("./AppaCustomerServices", repos = NULL, type = "source")
+
+library(AppaCustomerServices)
+AppaCustomerServices::kutuphaneler()
+```
+ 
+Bu rapor Bilgi Yönetim Sistemi dersinin Bitirme Projesi için oluşturulmuştur. 
+
+### Q1: İş probleminin tanımı
+
+**Appa Customer Services** şirketi, danışanlarından aldığı verilerdeki değerlere göre lokasyon analizi sağlamaktadır. Danışan, müşterilerinin kişisel bilgilerinin (Adı, adresi vb.) anonimliğini gözeterek **Appa**'ya iletir. **Appa CS**, kendisine sağlanan veri üzerinden danışanın yeni şubesini/deposunu nereye açabileceğini analiz eder. Veri içe aktarma kolaylığından ötürü **Suite CRM** kullanılmaktadır. 
+
+### Q2: İş problemini çözmede kullanılacak data seti
+
+Platforma eklenen veri seti dünya çapındaki e-ticaret verilerini barındıran temizlenmiş bir veri setidir. Veri seti Kaggle üzerinden bulunmuştur. Veri üzerinde yalnızca filtreleme ve format çalışması yapılmıştır. Sentetik veri üretilmemiştir. Ayrıca analizi iyileştirmek için şehirlerdeki hayat pahalılığı ile korelasyonu da incelenmiştir.
+
+[Satın Alma Verileri](https://www.kaggle.com/datasets/apoorvaappz/global-super-store-dataset)<br/>
+[Hayat Pahalılığı Verileri](https://www.kaggle.com/datasets/mvieira101/global-cost-of-living?select=cost-of-living.csv)
+
+### Q3: Veri seti keşifsel analizi
+
+Analiz için gereken önemli sütunlar: *Order_Date*, *CustomerID*, *City*, *State*, *Country*, *Profit* sütunlarıdır. Bu sütunlar sırasıyla *DateTime*, *Character*, *Character*, *Character*, *Character* ve *Double* cinsindedir. Satın alma veri seti halihazırda temizlenmiş verilerden oluştuğu için *Char to POSIXCt* ve *Char to Double* dönüşümleri dışında ön işlemeye ihtiyaç duyulmamıştır. Hayat Pahalılığı veri seti için eksik veriler sayıca az olduğu için satır ve diğer sütunları
+
+Aşağıdaki tabloda örnek olarak kullanılacak verinin ilk 5 satırı görülebilir:
+
+```{r echo=FALSE, paged.print=TRUE}
+us_data <- AppaCustomerServices::get_data("./data/data.xlsx")
+us_data <- AppaCustomerServices::char_to_date(us_data)
+us_data <- AppaCustomerServices::usd_to_tl(us_data)
+
+head(us_data, n = 5)
+```
+
+Danışan şirket için esas göz önüne alınacak veri kar olduğundan eyalet bazında ticaretten elde edilen kar grafiği aşağıdaki gibidir:
+
+```{r echo=FALSE}
+most_profited_5_states <- AppaCustomerServices::total_profit_by_state_5(us_data)
+AppaCustomerServices::make_graphic(most_profited_5_states)
+```
+
+Grafikte de görüleceği gibi *New York* ve *California* eyaletlerinde elde edilen kar birbirine çok yakınken, diğer eyaletler ile aralarındaki yüksekçe bir fark bulunmakta. Bu derin fark önemli bir **indikatör** olmasına karşın daha derinlemesine bir inceleme gerekmekte ancak bu inceleme Q5'te de değinildiği üzere **APPA CS** şirketinin ana analizini kapsamaktadır.
+
+
+
+En çok kar elde edilen NYC ile en yakın şehir arasında 1 milyar dolarlık bir fark bulunmaktadır:
+
+```{r echo=FALSE, paged.print=TRUE}
+kar <- AppaCustomerServices::total_profit_by_city_desc(us_data)
+
+head(kar)
+```
+
+
+Ve 5 şehirde de negatif kar elde edilmektedir:
+```{r echo=FALSE, paged.print=TRUE}
+zarar <- AppaCustomerServices::total_profit_by_city_asc(us_data)
+
+head(zarar)
+```
+### Q4: Veri setinin BYS platformuna ihtali
+
+Kullanılan CRM olan SuiteCRM'in import arayüzü kullanılarak import işlemi gerçekleştirildi. (Q6'da sağlanan videoda görülebilir)
+
+### Q5 : Yapılması planlanan veri analizi
+
+**Appa CS** firmasının analizini diğer analizlerden ayıran yegane fark *Volodymyr Agafonkin* tarafından sağlanan ve yine bir özgür yazılım projesi olan Leaflet'ten yararlanmaktır. Leaflet, Google servislerinin sunduğu harita hizmetinin açık kaynak halini, özgür yazılım prensiplerini benimsemiş kaynaklardan elde eder.
+
+Sunulacak hizmet için yapılan derin analizde, kullanıcının yeni şube/deposu için kar marjinini çeşitli verilerle(hayat pahalılığı, ortalama maaş vb.) korelasyonunu incelemek, daha sonra bu verileri kümeleme yöntemi ile harita üzerindeki izdüşümünü hesaplamak ve en doğru biçimde harita üzerinde göstermeyi amaçlamaktadır.
+
+
+Aşağıda kullanılacak haritanın, okulumuzun mühendislik bölümünü işaretlemiş hali incelenebilir:
+
+```{r echo=FALSE}
+basemap <- leaflet() %>%
+  # add different provider tiles
+  addProviderTiles(
+    "OpenStreetMap",
+    # give the layer a name
+    group = "OpenStreetMap"
+  )
+
+map_1 <- basemap %>%
+  addAwesomeMarkers(
+    lat = 40.11333611395505,
+    lng = 26.421648179032804,
+    label = "Starting point",
+  )
+
+map_1
+
+```
+
+### Q6 : Çalışan platformun gösterildiği sesli anlatımlı video
+
+[Bu linkten](https://youtu.be/lVmNOd4VrQA) SuiteCRM dashboard incelemesi ve Data Import işlemlerini görüntüleyebilirsiniz.
+
+
