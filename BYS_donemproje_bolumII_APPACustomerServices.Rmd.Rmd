@@ -114,3 +114,8 @@ map_1
 
 ```
 
+### Q6 : Çalışan platformun gösterildiği sesli anlatımlı video
+
+[Bu linkten](https://youtu.be/lVmNOd4VrQA) SuiteCRM dashboard incelemesi ve Data Import işlemlerini görüntüleyebilirsiniz.
+
+
