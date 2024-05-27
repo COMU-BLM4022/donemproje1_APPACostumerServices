@@ -81,5 +81,9 @@ zarar <- AppaCustomerServices::total_profit_by_city_asc(us_data)
 
 head(zarar)
 ```
+### Q4: Veri setinin BYS platformuna ihtali
+
+Kullanılan CRM olan SuiteCRM'in import arayüzü kullanılarak import işlemi gerçekleştirildi. (Q6'da sağlanan videoda görülebilir)
+
 
 
