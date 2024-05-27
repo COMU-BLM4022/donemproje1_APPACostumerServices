@@ -85,5 +85,32 @@ head(zarar)
 
 Kullanılan CRM olan SuiteCRM'in import arayüzü kullanılarak import işlemi gerçekleştirildi. (Q6'da sağlanan videoda görülebilir)
 
+### Q5 : Yapılması planlanan veri analizi
 
+**Appa CS** firmasının analizini diğer analizlerden ayıran yegane fark *Volodymyr Agafonkin* tarafından sağlanan ve yine bir özgür yazılım projesi olan Leaflet'ten yararlanmaktır. Leaflet, Google servislerinin sunduğu harita hizmetinin açık kaynak halini, özgür yazılım prensiplerini benimsemiş kaynaklardan elde eder.
+
+Sunulacak hizmet için yapılan derin analizde, kullanıcının yeni şube/deposu için kar marjinini çeşitli verilerle(hayat pahalılığı, ortalama maaş vb.) korelasyonunu incelemek, daha sonra bu verileri kümeleme yöntemi ile harita üzerindeki izdüşümünü hesaplamak ve en doğru biçimde harita üzerinde göstermeyi amaçlamaktadır.
+
+
+Aşağıda kullanılacak haritanın, okulumuzun mühendislik bölümünü işaretlemiş hali incelenebilir:
+
+```{r echo=FALSE}
+basemap <- leaflet() %>%
+  # add different provider tiles
+  addProviderTiles(
+    "OpenStreetMap",
+    # give the layer a name
+    group = "OpenStreetMap"
+  )
+
+map_1 <- basemap %>%
+  addAwesomeMarkers(
+    lat = 40.11333611395505,
+    lng = 26.421648179032804,
+    label = "Starting point",
+  )
+
+map_1
+
+```
 
