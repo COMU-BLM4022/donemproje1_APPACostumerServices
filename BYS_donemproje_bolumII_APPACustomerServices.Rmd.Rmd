@@ -1,0 +1,39 @@
+---
+title: "Bilgi Yönetim Sistemleri - Bitirme Projesi Rapor:
+Begüm Önal 200401082<br/>
+Barkın Oral 180401089<br/>
+Kubilay Kabataş 200401089<br/>
+Ramazan Eyüp Gültekin 200401003<br/>
+Tugay Bakay 200401029"
+output:
+  html_document:
+    df_print: paged
+---
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+install_and_load <- function(package) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+# List of packages to check and load
+packages <- c("readxl", "ggplot2", "leaflet", "leaflet.extras", "dplyr", "geosphere", "magrittr")
+
+# Apply the function to each package
+sapply(packages, install_and_load)
+
+install.packages("./AppaCustomerServices", repos = NULL, type = "source")
+
+library(AppaCustomerServices)
+AppaCustomerServices::kutuphaneler()
+```
+ 
+Bu rapor Bilgi Yönetim Sistemi dersinin Bitirme Projesi için oluşturulmuştur. 
+
+### Q1: İş probleminin tanımı
+
+**Appa Customer Services** şirketi, danışanlarından aldığı verilerdeki değerlere göre lokasyon analizi sağlamaktadır. Danışan, müşterilerinin kişisel bilgilerinin (Adı, adresi vb.) anonimliğini gözeterek **Appa**'ya iletir. **Appa CS**, kendisine sağlanan veri üzerinden danışanın yeni şubesini/deposunu nereye açabileceğini analiz eder. Veri içe aktarma kolaylığından ötürü **Suite CRM** kullanılmaktadır. 
+
+
+
