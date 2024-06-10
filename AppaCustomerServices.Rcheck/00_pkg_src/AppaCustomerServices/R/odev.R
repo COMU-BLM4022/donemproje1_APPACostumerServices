@@ -30,10 +30,9 @@ factor_cevirme <- function(data) {
 #' @export
 get_data <- function(path_to_data) {
   data <- readxl::read_xlsx(path_to_data, skip = 0)
-  selected_data <- data %>% dplyr::select(3,6,9,10,11,22)
+  selected_data <- data %>% select(3,6,9,10,11,22)
   colnames(selected_data) <- c("order_Date", "customerID", "city", "state", "country", "profit")
   us_data <- selected_data %>% filter(country == "United States")
-  us_data$order_Date <- as.POSIXct(us_data$order_Date, format = "%d-%m-%Y")
   return(us_data)
 }
 
@@ -77,8 +76,6 @@ filter_data <- function(data) {
 #'
 #' @return
 #' @export
-#'
-#' @examples
 numeric_yap_cof <- function(data) {
   sapply(3:ncol(data), function(x) {
     data[[x]] <<- gsub("\\.","",data[[x]])
@@ -150,7 +147,7 @@ total_profit_by_state_5 <- function(data) {
 make_graphic <- function(total_prof) {
   ggplot2::ggplot(total_prof, aes(x = reorder(state, total_profit), y = total_profit)) +
     geom_bar(stat = "identity",aes(fill = state)) +
-    labs(title = "Total Profit by State", x = "State", y = "Total Profit") +
+    labs(title = "Eyaletlerin Toplam Kar Değerleri", x = "Eyalet", y = "Kar Değeri") +
     theme_minimal() +
     scale_y_continuous(labels = comma)
 }
@@ -199,7 +196,7 @@ calculate_percentage_of_total <- function(data) {
 #' @param profit
 #' @param cost_of_living
 #'
-#' @return
+#' @return NA
 #' @export
 cof_profit_grafik <- function(profit,cost_of_living) {
   merged_data <- merge(cost_of_living, profit, by = "city")
@@ -209,4 +206,19 @@ cof_profit_grafik <- function(profit,cost_of_living) {
     scale_y_continuous(sec.axis = sec_axis(~.*100, name = "Cost of Living", labels = comma)) +
     labs(y = "Total Profit", x = "City", labels= comma) +
     theme_minimal()
+}
+
+
+
+#' Title
+#'
+#' @param profit
+#' @param cost_of_living
+#'
+#' @return NA
+#' @export
+read_state_data <- function(file_path) {
+  data <- read.csv(file_path, header = TRUE)
+
+  return(data)
 }

@@ -9,6 +9,9 @@ cof_profit_grafik(profit, cost_of_living)
 \arguments{
 \item{cost_of_living}{}
 }
+\value{
+NA
+}
 \description{
 Title
 }

@@ -11,7 +11,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2024-05-27 17:10:13 UTC; eyupg
+Packaged: 2024-06-10 15:05:08 UTC; eyupg
 Author: First Last [aut, cre] (YOUR-ORCID-ID)
 Maintainer: First Last <first.last@example.com>
-Built: R 4.3.3; ; 2024-05-27 17:10:24 UTC; windows
+Built: R 4.3.3; ; 2024-06-10 15:05:31 UTC; windows

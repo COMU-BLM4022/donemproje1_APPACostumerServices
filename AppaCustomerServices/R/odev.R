@@ -207,3 +207,17 @@ cof_profit_grafik <- function(profit,cost_of_living) {
     labs(y = "Total Profit", x = "City", labels= comma) +
     theme_minimal()
 }
+
+
+
+#' Title
+#'
+#'
+#' @export
+read_state_data <- function(file_path) {
+  data <- read.csv(file_path, header = TRUE)
+
+  names(data)[names(data) == "X...state"] <- "state"
+
+  return(data)
+}
