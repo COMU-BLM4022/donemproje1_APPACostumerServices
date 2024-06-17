@@ -9,6 +9,7 @@ get_data	get_data
 kutuphaneler	kutuphaneler
 make_graphic	make_graphic
 numeric_yap_cof	numeric_yap_cof
+read_state_data	read_state_data
 total_profit_by_city_asc	total_profit_by_city_asc
 total_profit_by_city_desc	total_profit_by_city_desc
 total_profit_by_state_5	total_profit_by_state_5

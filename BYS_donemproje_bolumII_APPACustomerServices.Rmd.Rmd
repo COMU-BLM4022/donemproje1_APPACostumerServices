@@ -9,26 +9,6 @@ output:
   html_document:
     df_print: paged
 ---
-```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-install_and_load <- function(package) {
-  if (!requireNamespace(package, quietly = TRUE)) {
-    install.packages(package)
-  }
-  library(package, character.only = TRUE)
-}
-
-# List of packages to check and load
-packages <- c("readxl", "ggplot2", "leaflet", "leaflet.extras", "dplyr", "geosphere", "magrittr")
-
-# Apply the function to each package
-sapply(packages, install_and_load)
-
-install.packages("./AppaCustomerServices", repos = NULL, type = "source")
-
-library(AppaCustomerServices)
-AppaCustomerServices::kutuphaneler()
-```
- 
 Bu rapor Bilgi Yönetim Sistemi dersinin Bitirme Projesi için oluşturulmuştur. 
 
 ### Q1: İş probleminin tanımı
@@ -41,8 +21,29 @@ Platforma eklenen veri seti dünya çapındaki e-ticaret verilerini barındıran
 
 [Satın Alma Verileri](https://www.kaggle.com/datasets/apoorvaappz/global-super-store-dataset)<br/>
 [Hayat Pahalılığı Verileri](https://www.kaggle.com/datasets/mvieira101/global-cost-of-living?select=cost-of-living.csv)
+[Eyaletlerin Vergi Oranları](https://www.avalara.com/taxrates/en/state-rates.html)
+[Eyaletlerin Koordinatları](https://www.latlong.net/category/states-236-14.html)
 
 ### Q3: Veri seti keşifsel analizi
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+install_and_load <- function(package) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package)
+  }
+  library(package, character.only = TRUE)
+}
+
+# List of packages to check and load
+packages <- c("readxl", "ggplot2", "leaflet", "leaflet.extras", "dplyr", "geosphere", "magrittr", "corrplot")
+
+# Apply the function to each package
+sapply(packages, install_and_load)
+
+install.packages("./AppaCustomerServices", repos = NULL, type = "source")
+
+library(AppaCustomerServices)
+AppaCustomerServices::kutuphaneler()
+```
 
 Analiz için gereken önemli sütunlar: *Order_Date*, *CustomerID*, *City*, *State*, *Country*, *Profit* sütunlarıdır. Bu sütunlar sırasıyla *DateTime*, *Character*, *Character*, *Character*, *Character* ve *Double* cinsindedir. Satın alma veri seti halihazırda temizlenmiş verilerden oluştuğu için *Char to POSIXCt* ve *Char to Double* dönüşümleri dışında ön işlemeye ihtiyaç duyulmamıştır. Hayat Pahalılığı veri seti için eksik veriler sayıca az olduğu için satır ve diğer sütunları
 
@@ -119,4 +120,130 @@ map_1
 
 [Bu linkten](https://youtu.be/lVmNOd4VrQA) SuiteCRM dashboard incelemesi ve Data Import işlemlerini görüntüleyebilirsiniz.
 
+### Final Analizi (11.06.2024 Tarihinde Eklenmiştir)
 
+Danışan şirketin açacağı yeni deponun konumunu optimize etmek için yapılacak analizde göz önüne alınacak yegane değer eyalet bazlı kar değeri olduğundan; eyaletlerin konumları, kar değeri ile ağırlıklandırarak tek bir noktaya indirgenmiştir 
+
+```{r echo=FALSE}
+koordinatlar <- AppaCustomerServices::read_state_data("./data/state-coordinates.csv")
+
+grouped_states <- us_data %>%
+  group_by(state)
+
+total_profit_by_state <- grouped_states %>%
+  summarise(total_profit = sum(profit))
+
+df_merged <- merge(total_profit_by_state, koordinatlar, by = "state")
+
+# Ağırlıklı ortalama fonksiyonu
+weighted_average <- function(df, latitude, longitude, total_profit) {
+  # Negatif karlılığı olanları filtrele
+  filtered_data <- df[df$total_profit >= 0, ]
+  
+  # Ağırlıkları normalize et
+  weights <- filtered_data$total_profit / sum(filtered_data$total_profit)
+  
+  # Ağırlıklı ortalamaları hesapla
+  weighted_latitude <- sum(weights * filtered_data$latitude) / sum(weights)
+  weighted_longitude <- sum(weights * filtered_data$longitude) / sum(weights)
+  
+  # Sonuçları döndür
+  return(c(weighted_latitude, weighted_longitude))
+}
+
+# Ağırlıklı ortalama değerleri hesapla
+weighted_values <- weighted_average(df_merged, data$latitude, data$longitude, data$total_profit)
+
+basemap <- leaflet() %>%
+  # add different provider tiles
+  addProviderTiles(
+    "OpenStreetMap",
+    # give the layer a name
+    group = "OpenStreetMap"
+  ) %>%
+  setView(lng = -98, lat = 38, zoom = 4)
+
+map_1 <- basemap %>%
+  addAwesomeMarkers(
+    lat = weighted_values[1],
+    lng = weighted_values[2],
+    label = "Orta nokta",
+  )
+
+map_1
+```
+Bu nokta, yapılan satışların her birine ağırlıklandırılmış şekildeki optimum uzaklıktır.
+
+Ağırlıklandırılmış orta nokta *Illanois* eyaletine düşmüş olsa da bu bizi bir sonraki analizimize getirmektedir; Illanois eyaleti en karlı lokasyon mudur?
+```{r echo=FALSE}
+
+basemap <- leaflet() %>%
+  # add different provider tiles
+  addProviderTiles(
+    "OpenStreetMap",
+    # give the layer a name
+    group = "OpenStreetMap"
+  ) %>%
+  setView(lng = -98, lat = 38, zoom = 5) %>%  addTiles() %>%
+  addCircles(
+    lat = weighted_values[1],
+    lng = weighted_values[2],
+    radius = 200000, color = "red", fill = TRUE, fillOpacity = 0.1)
+
+basemap
+```
+Ağırlıklandırılmış noktayı 200 kilometrelik yarıçapa sahip bir çembere çevirdiğimizde karşımıza çıkan alan, üç ayrı eyaleti kapsamaktadır. Bu eyaletler (Iowa, Illinois, Missouri) danışan şirketimizin açacağı yeni depo için aday eyaletlerdir.
+
+Bu eyaletleri değerlendirirken göz önüne alınabilecek çeşitli parametreler olsa da kar maksimizasyonu için; şirketin satışlarının, çalışan giderleri göz önüne alınarak **Hayat Pahalılığı** ve kar göz önüne alınarak **eyaletin vergi oranı** ile korelasyonu incelenmiştir: 
+```{r echo=FALSE}
+cost_of_living <- AppaCustomerServices::read_state_data("./data/cost-of-living-index.csv")
+
+filtered_col_data <- filter(cost_of_living, state %in% c("Iowa", "Illinois", "Missouri"))
+
+cost_of_living_mean <- filtered_col_data %>%
+  group_by(state) %>%
+  summarise(col_index = mean(CostOfLivingIndex2023))
+
+tax_rates <- AppaCustomerServices::read_state_data("./data/states-tax-rate.csv")
+
+tax_rates$tax_rate <- gsub("%", "", tax_rates$tax_rate)
+tax_rates$tax_rate <- as.numeric(tax_rates$tax_rate)
+
+
+cor_merged_df <- merge(total_profit_by_state, cost_of_living_mean, by = "state")
+
+cor_merged_df <- merge(cor_merged_df, tax_rates, by = "state")
+
+
+correlation_matrix <- cor(cor_merged_df[, c("total_profit", "col_index", "tax_rate")])
+
+corrplot(correlation_matrix, method="number")
+```
+Ortaya çıkan korelasyon tablosu açıkça göstermektedir ki; şirket satışlarından elde edilen kar ile hayat pahalılığı ve eyaletin vergi oranı arasında negatif bir ilişki vardır. Dolayısıyla şirket için önerilecek bölgelerde bu verilerin minimalize edilmesi amaçlanacaktır.
+
+Bu eyaletlerin vergi oranları incelendiğinde en az vergi oranına sahip olan eyalet **Missorui** olarak ortaya çıkmıştır:
+```{r echo=FALSE}
+# Iowa, Illinois ve Missouri'yi filtrele
+filtered_data <- filter(tax_rates, state %in% c("Iowa", "Illinois", "Missouri"))
+
+# Renk paleti oluştur
+my_colors <- c("#fc8d59", "#ffffbf", "#91bfdb")
+
+barplot(filtered_data$tax_rate, names.arg = filtered_data$state, col = my_colors, ylim = c(2, 8))  # Renklendirme
+title(main = "Eyaletlere Göre Vergi Oranları")  # Başlık
+axis(2, label = "Vergi Oranı (%)", at = 5, pos = -0.2)  # Y ekseni ismi
+abline(h = seq(2, 8, by = .5), col = "gray", lty = "dotted")
+```
+
+Aynı şekilde bu üç eyaletin hayat pahalılığı endeksi incelendiğinde hayat pahalılığı açısından en ucuz eyalet yine **Missorui** olmuştur:
+```{r echo=FALSE}
+filtered_col_data <- filter(cost_of_living_mean, state %in% c("Iowa", "Illinois", "Missouri"))
+
+# Bar grafiği oluştur
+barplot(filtered_col_data$col_index, names.arg = filtered_col_data$state, col = my_colors, ylim = c(85,95))  # Renklendirme
+title(main = "Eyaletlerin Hayat Pahalılığı Endeksi")  # Başlık
+axis(2, label = "Hayat Pahalılığı", at = 90, pos = -0.2)  # Y ekseni ismi
+abline(h = seq(86, 94, by = 1), col = "gray", lty = "dotted")
+```
+
+Bu analizler göstermiştir ki: Danışan şirketin yeni açacağı depo için seçilecek en makul lokasyon **Missouri** eyaletinin doğu **Kuzey-Doğu** bölgesidir. 
